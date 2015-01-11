@@ -1,7 +1,6 @@
 /*
 This is a C++ implement of the beautiful typesetting problem.
 Dynamic methods.
-Special thanks to Mr. Tan. 
 */
 
 #include <cstdio>
@@ -25,8 +24,9 @@ public:
 void Typesetting::FindSolution() {
     FindPreValue();
     FindPostValue();
-    
+
     long long minP = -1;
+    long long temp_P = 0;
     int mina = 0;
     int minb = 0;
     int curr_len = 0;
@@ -37,9 +37,8 @@ void Typesetting::FindSolution() {
         }
         curr_len = word[i];
         j = i + 1;
-        while (j < num && curr_len + word[j] + 1 <= max_len) {
-            curr_len += word[j] + 1;
-            long long temp_P = optiValuePre[i] + optiValuePost[j];
+        while (j < num && curr_len <= max_len) {// BUG
+            temp_P = optiValuePre[i] + optiValuePost[j];
             if (minP < 0 || temp_P <= minP) {
                 if (temp_P != minP) {
                     minP = temp_P;
@@ -56,6 +55,7 @@ void Typesetting::FindSolution() {
                     }
                 }
             }
+            curr_len += word[j] + 1;           
             j++;
         }
     }
@@ -88,7 +88,7 @@ void Typesetting::FindPreValue() {
     optiValuePre[0] = 0;
 
     // Search from backward to forward 
-    int curr_len = 0; // Length of current line
+    long long curr_len = 0; // Length of current line
 
     // Dynamic begins
     for (int i = 1; i < num; ++i) {
@@ -100,7 +100,8 @@ void Typesetting::FindPreValue() {
         while (temp_cut_pos != 0 && curr_len + word[temp_cut_pos - 1] + 1 <= max_len) {
             temp_cut_pos--;
             curr_len += word[temp_cut_pos] + 1;
-            long long int temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePre[temp_cut_pos];
+            long long temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePre[temp_cut_pos];
+
             // If the current cut position is better
             if (temp_P_val < optiValuePre[i]) {
                 optiValuePre[i] = temp_P_val;
@@ -113,7 +114,7 @@ void Typesetting::FindPostValue() {
 
     // Search from backward to forward 
     int curr_word = num - 1; // Index of current word
-    int curr_len = word[curr_word]; // Length of current line
+    long long curr_len = word[curr_word]; // Length of current line
 
     // If all words can be put in a single line
     while (curr_word != 0 && curr_len + word[curr_word - 1] + 1 <= max_len) {
@@ -132,7 +133,8 @@ void Typesetting::FindPostValue() {
         while (temp_cut_pos != num - 1 && curr_len + word[temp_cut_pos + 1] + 1 <= max_len) {
             temp_cut_pos++;
             curr_len += word[temp_cut_pos] + 1;
-            long long int temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePost[temp_cut_pos + 1];
+            long long temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePost[temp_cut_pos + 1];
+
             // If the current cut position is better
             if (temp_P_val < optiValuePost[i]) {
                 optiValuePost[i] = temp_P_val;
