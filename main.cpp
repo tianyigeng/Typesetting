@@ -5,178 +5,146 @@ Special thanks to Mr. Tan.
 */
 
 #include <cstdio>
-// #include <vector>
-// #include <cmath>
-// using namespace std;
-
-inline static long long square(int x) {
-	return (long long)(x*x);
-}
 
 class Typesetting {
 public:
-	int num; // Num of words
-	int max_len; // Maximum length of a line
-	int* word;
-	long long* optiValuePre;
-	long long* optiValuePost;
-	// vector<int> cut_point_post; // Index of ending words in all lines @last paragraph.
-	// vector<int> cut_point_pre; // Index of starting words in all lines @first paragraph.
+    int num; // Num of words
+    int max_len; // Maximum length of a line
+    int* word;
+    long long* optiValuePre;
+    long long* optiValuePost;
 
-	Typesetting();
-	~Typesetting();
+    Typesetting();
+    ~Typesetting();
 
-	void FindPostValue(); // Implement the optiValuePost array. 
-	void FindPreValue(); // Implement the optiValuePre array. 
-	void FindSolution();
+    void FindPostValue(); // Implement the optiValuePost array. 
+    void FindPreValue(); // Implement the optiValuePre array. 
+    void FindSolution();
 };
 
 void Typesetting::FindSolution() {
-	FindPreValue();
-	//printf("Pre complete\n");
-	FindPostValue();
-	//printf("Post complete\n");
-	long long minP = -1;
-	int mina = 0;
-	int minb = 0;
-	int curr_len = 0;
-	int j = 0;
-	for (int i = 0; i < num; ++i) {
-		if (minP >= 0 && optiValuePre[i] > minP) {
-			continue;
-		}
-		curr_len = word[i];
-		j = i + 1;
-		while (j < num && curr_len + word[j] + 1 <= max_len) {
-			curr_len += word[j] + 1;
-			long long temp_P = optiValuePre[i] + optiValuePost[j];
-			if (minP < 0 || temp_P <= minP) {
-				if (temp_P != minP) {
-					minP = temp_P;
-					mina = i;
-					minb = j;
-				}
-				else {
-					if (i < mina) {
-						mina = i;
-						minb = j;
-					}
-					else if (j < minb) {
-						minb = j;
-					}
-				}
-			}
-			j++;
-		}
-	}
-	//print_vec(optiValuePre);
-	//print_vec(optiValuePost);
-	//cout << solution.min_P << " " << solution.a << " " << solution.b;
-	printf("%lld %d %d", minP, mina, minb);
-	return;
+    FindPreValue();
+    FindPostValue();
+    
+    long long minP = -1;
+    int mina = 0;
+    int minb = 0;
+    int curr_len = 0;
+    int j = 0;
+    for (int i = 0; i < num; ++i) {
+        if (minP >= 0 && optiValuePre[i] > minP) {
+            continue;
+        }
+        curr_len = word[i];
+        j = i + 1;
+        while (j < num && curr_len + word[j] + 1 <= max_len) {
+            curr_len += word[j] + 1;
+            long long temp_P = optiValuePre[i] + optiValuePost[j];
+            if (minP < 0 || temp_P <= minP) {
+                if (temp_P != minP) {
+                    minP = temp_P;
+                    mina = i;
+                    minb = j;
+                }
+                else {
+                    if (i < mina) {
+                        mina = i;
+                        minb = j;
+                    }
+                    else if (j < minb) {
+                        minb = j;
+                    }
+                }
+            }
+            j++;
+        }
+    }
+    printf("%lld %d %d", minP, mina, minb);
+    return;
 }
 
 Typesetting::Typesetting() {
-	int temp = 0;
-	scanf("%d%d", &num, &max_len);
-	word = new int[num];
-	optiValuePost = new long long[num];
-	optiValuePre = new long long[num];
+    int temp = 0;
+    scanf("%d%d", &num, &max_len);
+    word = new int[num];
+    optiValuePost = new long long[num];
+    optiValuePre = new long long[num];
 
-	for (int i = 0; i < num; ++i) {
-		scanf("%d", &word[i]);
-	}
-	// printf("Input complete\n");
-	// cut_point_post = vector<int>(num, 0);
-	// cut_point_pre = vector<int>(num, 0);
-	return;
+    for (int i = 0; i < num; ++i) {
+        scanf("%d", &word[i]);
+    }
+    return;
 }
 
 Typesetting::~Typesetting() {
-	delete[] word;
-	delete[] optiValuePost;
-	delete[] optiValuePre;
-	return;
+    delete[] word;
+    delete[] optiValuePost;
+    delete[] optiValuePre;
+    return;
 }
 
 void Typesetting::FindPreValue() {
 
-	optiValuePre[0] = 0;
+    optiValuePre[0] = 0;
 
-	// Search from backward to forward 
-	// int curr_word = -1; // Index of current word
-	int curr_len = 0; // Length of current line
-	// int prev_len = 0; // Length of previous line
+    // Search from backward to forward 
+    int curr_len = 0; // Length of current line
 
-	// // If all words can be put in a single line
-	// while (curr_len + word[curr_word + 1] + 1 <= max_len) {
-	//     curr_word++;
-	//     curr_len += word[curr_word] + 1; 
-	//     optiValuePre[curr_word] = 0; 
-	//     cut_point_pre[curr_word] = 0;
-	// }
-	// prev_len = curr_len;
+    // Dynamic begins
+    for (int i = 1; i < num; ++i) {
+        int temp_cut_pos = i - 1;
+        curr_len = word[temp_cut_pos];
+        optiValuePre[i] = (max_len - curr_len)*(max_len - curr_len) + optiValuePre[temp_cut_pos];
 
-	// Dynamic begins
-	for (int i = 1; i < num; ++i) {
-		int temp_cut_pos = i - 1;
-		curr_len = word[temp_cut_pos];
-		optiValuePre[i] = square(max_len - curr_len) + optiValuePre[temp_cut_pos];
-
-		// New words can be added to line begin with word[i]
-		while (temp_cut_pos != 0 && curr_len + word[temp_cut_pos - 1] + 1 <= max_len) {
-			temp_cut_pos--;
-			curr_len += word[temp_cut_pos] + 1;
-			// prev_len -= word[temp_cut_pos] - 1;
-			long long int temp_P_val = square(max_len - curr_len) + optiValuePre[temp_cut_pos];
-			// If the current cut position is better
-			if (temp_P_val < optiValuePre[i]) {
-				optiValuePre[i] = temp_P_val;
-				// cut_point_pre[i] = temp_cut_pos;
-			}
-		}
-	}
+        // New words can be added to line begin with word[i]
+        while (temp_cut_pos != 0 && curr_len + word[temp_cut_pos - 1] + 1 <= max_len) {
+            temp_cut_pos--;
+            curr_len += word[temp_cut_pos] + 1;
+            long long int temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePre[temp_cut_pos];
+            // If the current cut position is better
+            if (temp_P_val < optiValuePre[i]) {
+                optiValuePre[i] = temp_P_val;
+            }
+        }
+    }
 }
 
 void Typesetting::FindPostValue() {
 
-	// Search from backward to forward 
-	int curr_word = num - 1; // Index of current word
-	int curr_len = word[curr_word]; // Length of current line
+    // Search from backward to forward 
+    int curr_word = num - 1; // Index of current word
+    int curr_len = word[curr_word]; // Length of current line
 
-	// If all words can be put in a single line
-	while (curr_word != 0 && curr_len + word[curr_word - 1] + 1 <= max_len) {
-		curr_word--;
-		curr_len += word[curr_word] + 1;
-		optiValuePost[curr_word] = 0;
-		// cut_point_post[curr_word] = num - 1;
-	}
+    // If all words can be put in a single line
+    while (curr_word != 0 && curr_len + word[curr_word - 1] + 1 <= max_len) {
+        curr_word--;
+        curr_len += word[curr_word] + 1;
+        optiValuePost[curr_word] = 0;
+    }
 
-	// Dynamic begins
-	for (int i = curr_word - 1; i >= 0; --i) {
-		int temp_cut_pos = i;
-		curr_len = word[i];
-		// cut_point_post[curr_word] = i;
-		optiValuePost[i] = optiValuePost[i + 1] + square(max_len - curr_len);
+    // Dynamic begins
+    for (int i = curr_word - 1; i >= 0; --i) {
+        int temp_cut_pos = i;
+        curr_len = word[i];
+        optiValuePost[i] = optiValuePost[i + 1] + (max_len - curr_len)*(max_len - curr_len);
 
-		// New words can be added to line begin with word[i]
-		while (temp_cut_pos != num - 1 && curr_len + word[temp_cut_pos + 1] + 1 <= max_len) {
-			temp_cut_pos++;
-			curr_len += word[temp_cut_pos] + 1;
-			long long int temp_P_val = square(max_len - curr_len) + optiValuePost[temp_cut_pos + 1];
-			// If the current cut position is better
-			if (temp_P_val < optiValuePost[i]) {
-				optiValuePost[i] = temp_P_val;
-				// cut_point_post[i] = temp_cut_pos;
-			}
-		}
-	}
+        // New words can be added to line begin with word[i]
+        while (temp_cut_pos != num - 1 && curr_len + word[temp_cut_pos + 1] + 1 <= max_len) {
+            temp_cut_pos++;
+            curr_len += word[temp_cut_pos] + 1;
+            long long int temp_P_val = (max_len - curr_len)*(max_len - curr_len) + optiValuePost[temp_cut_pos + 1];
+            // If the current cut position is better
+            if (temp_P_val < optiValuePost[i]) {
+                optiValuePost[i] = temp_P_val;
+            }
+        }
+    }
 }
 
 int main() {
 
-	Typesetting prob;
-	prob.FindSolution();
+    Typesetting prob;
+    prob.FindSolution();
 
-	return 0;
+    return 0;
 }
